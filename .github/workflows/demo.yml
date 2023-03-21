@@ -25,6 +25,20 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+
+      # Kun halutaan hyödyntää build-vaiheen outputtia, job artefactia,
+      # joka on tällä esimerkillä kansio dist
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with: 
+          name: dist-files
+          # Tässä kerrotaan tälle actionille, mitkä on ne kohteet, jotka halutaan
+          # (Kun multiple lines, lisätään "|" )
+          path: |
+            dist
+            package.json
+
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
