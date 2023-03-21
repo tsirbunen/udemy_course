@@ -1,5 +1,6 @@
 name: Test and deploy project
-on: push
+# Kun halutaan voida käynnistää myös manuaalisesti: workflow_dispatch
+on: [push, workflow_dispatch]
 jobs:
   # Ensimmäinen job
   test:
@@ -30,6 +31,7 @@ jobs:
       - name: Run tests
         run: npm test
   
+  # Toinen job
   deploy:
     # Kun halutaan ajaa sequntially, voidaan määrittää, minkä kaikkien jobien
     # pitää olla valmiina, jotta tämä job ajetaan (voidaan lisätä useita)
