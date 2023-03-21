@@ -1,0 +1,30 @@
+name: Test project
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      
+      # Runner ajaa tätä jollakin serverillä, ja sen pitää hakea ensin koodi github repositoriosta
+      # Runner EI AJA repositoriossa!!!
+      - name: Get code from repository
+        # Tälle voitaisiin kirjoittaa omat scriptit, mutta helpompi käyttää valmista official actionia
+        # Kun käytetään ationia, keyword on uses
+        uses: actions/checkout@v3
+
+        # Koska käytetään ubuntu-latest, tiedetään, että node on jo asennettu 
+        # ja siksi tätä steppiä ei tarvita oikeasti.
+        # MUTTA: Jos käytetty ubuntu-latest pitää sisällään NodeJS version 16,
+        # silloin on pointtia tehdä tämä step ja installoida NodeJS 18
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with: 
+          node-version: '18'
+      
+      - name: Install dependencies
+        # Voitaisiin laittaa npm install, mutta npm ci käyttää niitä dependenc-versioita,
+        # jotka on locked-tiedostossa
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
