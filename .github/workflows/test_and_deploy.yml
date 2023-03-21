@@ -1,6 +1,7 @@
-name: Test project
+name: Test and deploy project
 on: push
 jobs:
+  # Ensimmäinen job
   test:
     runs-on: ubuntu-latest
     steps:
@@ -28,3 +29,21 @@ jobs:
       
       - name: Run tests
         run: npm test
+  
+  deploy:
+    # Jokaisella jobilla on oma runner!
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code from repository
+        uses: actions/checkout@v3
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with: 
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      - name: Deploy
+        run: echo "Deploying..."
