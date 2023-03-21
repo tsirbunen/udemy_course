@@ -15,6 +15,7 @@ jobs:
         run: npm run lint
       - name: Test code
         run: npm run test
+
   build:
     needs: test
     runs-on: ubuntu-latest
@@ -31,17 +32,32 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with: 
+          # Tämä määrää, minkä niminen on se kokonaisuus, joka on tuotettu artefact.
+          # Se tulee olemaan zipped
           name: dist-files
           # Tässä kerrotaan tälle actionille, mitkä on ne kohteet, jotka halutaan
           # (Kun multiple lines, lisätään "|" )
-          path: |
-            dist
-            package.json
+          # path: |
+          #   dist
+          #   package.json
+          path: dist
 
 
   deploy:
+    # Tässä on pakko olla, että needs build, koska build-vaihe pitää ensi suorittaa,
+    # jotta se ehtii uploadata artifacts, jotta ne voidaan tässä jobissa downloadata
     needs: build
     runs-on: ubuntu-latest
     steps:
+      # Tässä jobissa voimme downloadata artifacts, koska ne on uploaded build-jobissa
+      - name: Get build artifacts
+        uses: actions/download-artifacts@v3
+        with:
+          # Tässä on annettava sama nimi, kuin mikä annetaan uploadissa.
+          # Täällä unzipataan. HUOM: Kun tuodaan tämä dist-files-kansio, 
+          # tämä itse kansio menetetään, ja sen sisältö on suoraan tarjolla
+          name: dist-files
+      - name: Output contents list
+        run: ls
       - name: Deploy
         run: echo "Deploying..."
