@@ -29,14 +29,14 @@ on:
       # Mikä vain branch, jonka nimi alkaa bug/
       # ja jossa saa olla lisää "/"-merkkejä
       - 'bug/**'
-    # Filtteröidään tiedostojen perusteella
-    paths-ignore:
-      # Aja, kun ei tapahdu muutosta tiedostossa 
-      # VAIKKA tapahtuisi muutos jossain toisessa tiedostossa 
-      - '.github/workflows/*'
-    # Aja, kun muuttuu joku ts-tiedosto
-    paths:
-      - '**.ts'
+    # # Filtteröidään tiedostojen perusteella
+    # paths-ignore:
+    #   # Aja, kun ei tapahdu muutosta tiedostossa 
+    #   # VAIKKA tapahtuisi muutos jossain toisessa tiedostossa 
+    #   - '.github/workflows/*'
+    # # Aja, kun muuttuu joku ts-tiedosto
+    # paths:
+    #   - '**.ts'
 
 
 jobs:
