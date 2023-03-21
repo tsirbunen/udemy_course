@@ -31,6 +31,9 @@ jobs:
         run: npm test
   
   deploy:
+    # Kun halutaan ajaa sequntially, voidaan määrittää, minkä kaikkien jobien
+    # pitää olla valmiina, jotta tämä job ajetaan (voidaan lisätä useita)
+    needs: [test]
     # Jokaisella jobilla on oma runner!
     runs-on: ubuntu-latest
     steps:
