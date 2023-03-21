@@ -10,10 +10,35 @@ on:
     # Jonka activity type on opened
     types:
     - opened
+    # Ja jolle voidaan vielä määrittää event filter
+    branches:
+    - main
+
   # Jos halutaan myös mahdollisuus käynnistää manuaalisesti.
   # Huomaa, että tässä pitää laittaa loppuun ":", vaikka ei
   # määritetäkään tyyppejä
   workflow_dispatch:
+
+  push:
+    branches:
+      - main
+      # Mikä vain branch, jonka nimi alkaa dev-
+      - 'dev-*'
+      # Mikä vain branch, jonka nimi alkaa feature/
+      - 'feature/*'
+      # Mikä vain branch, jonka nimi alkaa bug/
+      # ja jossa saa olla lisää "/"-merkkejä
+      - 'bug/**'
+    # Filtteröidään tiedostojen perusteella
+    paths-ignore:
+      # Aja, kun ei tapahdu muutosta tiedostossa 
+      # VAIKKA tapahtuisi muutos jossain toisessa tiedostossa 
+      - '.github/workflows/*'
+    # Aja, kun muuttuu joku ts-tiedosto
+    paths:
+      - '**.ts'
+
+
 
 jobs:
   deploy:
