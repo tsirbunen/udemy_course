@@ -1,5 +1,20 @@
 name: Events Demo 1
-on: ...
+# Jokainen push aiheuttaisi näissä tämän workflown
+# on: push
+# on: [push]
+
+# Kun halutaan vain, kun pull_request tietyissä tapauksissa
+on: 
+  # Triggeröityy, kun tulee pull_request
+  pull_request:
+    # Jonka activity type on opened
+    types:
+    - opened
+  # Jos halutaan myös mahdollisuus käynnistää manuaalisesti.
+  # Huomaa, että tässä pitää laittaa loppuun ":", vaikka ei
+  # määritetäkään tyyppejä
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
