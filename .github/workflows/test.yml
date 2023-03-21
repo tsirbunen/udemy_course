@@ -1,4 +1,3 @@
-
 name: Test project
 on: push
 jobs:
