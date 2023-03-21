@@ -51,7 +51,7 @@ jobs:
     steps:
       # Tässä jobissa voimme downloadata artifacts, koska ne on uploaded build-jobissa
       - name: Get build artifacts
-        uses: actions/download-artifacts@v3
+        uses: actions/download-artifact@v3
         with:
           # Tässä on annettava sama nimi, kuin mikä annetaan uploadissa.
           # Täällä unzipataan. HUOM: Kun tuodaan tämä dist-files-kansio, 
