@@ -19,6 +19,14 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+
+    # Kun halutaan, että job tuottaa simple value outputteja, on 
+    # outputit listattava tässä
+    outputs:
+      # steps on eräs github context; publish on itse annettu id (alempana)
+      # ja something on se key, joka on annettu alempana, johon arvotalletetaan
+      script-file: ${{ steps.publish.outputs.something }}
+
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -26,6 +34,19 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      
+      # Testausmielessä halutaan nyt ottaa talteen esimerkkinä 
+      # simple value job outputista dist/assets-kansioon muodostuvan
+      # js-tiedoston nimi. Tässä se ensin printataan
+      - name: Echo js-file name
+        run: find dist/assets/*.js -type f -execdir echo '{}' ';'
+      # echo 'something={}'  >> $GITHUB_OUTPUT 
+      # aiheuttaa sen, että output menee special file in environment, jonne key-value kirjoitetaan
+      - name: Publish js-file name
+      # Huom: Täällä on annettava id stepille
+        id: publish
+        run: find dist/assets/*.js -type f -execdir echo 'something={}' >> $GITHUB_OUTPUT ';'     
+
 
       # Kun halutaan hyödyntää build-vaiheen outputtia, job artefactia,
       # joka on tällä esimerkillä kansio dist
@@ -59,5 +80,11 @@ jobs:
           name: dist-files
       - name: Output contents list
         run: ls
+      
+      - name: Output simple value file name
+        # needs on taas context, ja koska tälle jobille needs build, tässä voidaan
+        # saada sieltä output
+        run: echo "${{ needs.build.outputs.script-file }}"
+
       - name: Deploy
         run: echo "Deploying..."
