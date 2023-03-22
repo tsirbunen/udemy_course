@@ -9,6 +9,25 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+
+      - name: Cache dependencies
+        # Action ohjaa tallettamaan pathissa olevan kohteen GitHubin cloudiin 
+        uses: actions/cache@v3
+        with:
+          # Kun npm tekee installaation, se jo itsessään luo oman internal dependency cachen, 
+          # joka on tuo .npm, ja jota nyt hyödynnetään (siellä on ne meidän dependencies,
+          # joita käyttäisimme joka tapauksessa). Joka jobissa on ilman tätä meidän cachingia
+          # installoitava uudellee, koska jobit ajetaan eri koneilla, eikä niillä ole ilman
+          # tätä tarjolla tämä cache (koneiden välillä)
+          path: ~/.npm 
+          # Retrieving and recreating on runner machine; also indicatess whether cache 
+          # should be discarded (jos cache pitää muuttaa) > annettava muuttujanimi, joka voi muttua.
+          # Alla otetaan GitHub kontekstista funktio hashFiles, joka hashaa kaikki package-lock.json-
+          # tiedostot, ja jos jossain niistä on muutoksia, muuttuu key, ja silloin tiedetään, että
+          # cache on invalid ja pitää muuttaa > dependencies pitää installoida.
+          # (Node mudulit siis aina installoidaan, mutta jos on validi cache, käytetään sitä apuna.)
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -19,72 +38,48 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-
-    # Kun halutaan, että job tuottaa simple value outputteja, on 
-    # outputit listattava tässä
     outputs:
-      # steps on eräs github context; publish on itse annettu id (alempana)
-      # ja something on se key, joka on annettu alempana, johon arvotalletetaan
       script-file: ${{ steps.publish.outputs.something }}
 
     steps:
       - name: Get code
         uses: actions/checkout@v3
+
+      # Huomaa, että myös täällä on tehtävä cache-temput!
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm 
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
       - name: Build website
         run: npm run build
       
-      # Testausmielessä halutaan nyt ottaa talteen esimerkkinä 
-      # simple value job outputista dist/assets-kansioon muodostuvan
-      # js-tiedoston nimi. Tässä se ensin printataan
       - name: Echo js-file name
         run: find dist/assets/*.js -type f -execdir echo '{}' ';'
-      # echo 'something={}'  >> $GITHUB_OUTPUT 
-      # aiheuttaa sen, että output menee special file in environment, jonne key-value kirjoitetaan
       - name: Publish js-file name
-      # Huom: Täällä on annettava id stepille
         id: publish
         run: find dist/assets/*.js -type f -execdir echo 'something={}' >> $GITHUB_OUTPUT ';'     
-
-
-      # Kun halutaan hyödyntää build-vaiheen outputtia, job artefactia,
-      # joka on tällä esimerkillä kansio dist
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with: 
-          # Tämä määrää, minkä niminen on se kokonaisuus, joka on tuotettu artefact.
-          # Se tulee olemaan zipped
           name: dist-files
-          # Tässä kerrotaan tälle actionille, mitkä on ne kohteet, jotka halutaan
-          # (Kun multiple lines, lisätään "|" )
-          # path: |
-          #   dist
-          #   package.json
           path: dist
 
 
   deploy:
-    # Tässä on pakko olla, että needs build, koska build-vaihe pitää ensi suorittaa,
-    # jotta se ehtii uploadata artifacts, jotta ne voidaan tässä jobissa downloadata
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # Tässä jobissa voimme downloadata artifacts, koska ne on uploaded build-jobissa
+      - name: Output simple value file name
+        run: echo "${{ needs.build.outputs.script-file }}"
       - name: Get build artifacts
         uses: actions/download-artifact@v3
         with:
-          # Tässä on annettava sama nimi, kuin mikä annetaan uploadissa.
-          # Täällä unzipataan. HUOM: Kun tuodaan tämä dist-files-kansio, 
-          # tämä itse kansio menetetään, ja sen sisältö on suoraan tarjolla
           name: dist-files
       - name: Output contents list
         run: ls
-      
-      - name: Output simple value file name
-        # needs on taas context, ja koska tälle jobille needs build, tässä voidaan
-        # saada sieltä output
-        run: echo "${{ needs.build.outputs.script-file }}"
-
       - name: Deploy
         run: echo "Deploying..."
