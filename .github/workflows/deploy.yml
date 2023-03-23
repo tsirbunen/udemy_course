@@ -12,6 +12,7 @@ env:
 
 jobs:
   test:
+
     # Voidaan myös antaa jobin tasolla env-variable, joka on
     # tarjolla vain tässä jobissa
     env: 
@@ -41,12 +42,19 @@ jobs:
         # Alla käytetään kontekstin env-muuttujaa ${{ }} avulla
         run: echo "MONGODB_NAME: ${{ env.MONGODB_NAME }}"
   deploy:
+    # Voidaan luoda myös GitHubissa environment (!= env)
+    # ja voidaan samassa myös määrätä env
+    # Ja määritetään GitHubissa MY_ENVIRONMENT_SECRET
+    environment:  me-environment
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Output information
+        # Alla oleva secret on annettu GitHubissa (repository secret). 
+        # Vaikka sen tässä printtaa sen arvo ei tulostu koskaan:
         run: |        
-          echo "..."
+          echo "Will not print this:  ${{ secrets.REPOSITORY_SECRET }}"
+          echo "Will not print this either: ${{ secrets.MY_ENVIRONMENT_SECRET }}"
 
 
 
