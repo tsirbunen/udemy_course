@@ -4,8 +4,18 @@ on:
     branches:
       - main
       - dev
+# Tämä on tarjolla kaikille jobeille, kun annettu tällä tasolla
+# ellei jobissa päällekirjoitettava
+env:
+  - MONGODB_NAME: database-name-workflow-level
+  - PORT : 8765
+
 jobs:
   test:
+    # Voidaan myös antaa jobin tasolla env-variable, joka on
+    # tarjolla vain tässä jobissa
+    env: 
+      - MONGODB_NAME: database-name-job-level
     environment: testing
     runs-on: ubuntu-latest
     steps:
@@ -19,11 +29,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run server
-        run: npm start & npx wait-on http://127.0.0.1:XYZ
+        # Voidaan myös antaa stepin tasolla env-variable, joka on
+        # tarjolla vain tässä stepissä
+        env: 
+          - MONGODB_NAME: database-name-job-level
+          # Alla voidaan käyttää $-merkin avulla env-muuttujaa
+        run: npm start & npx wait-on http://127.0.0.1:$PORT
       - name: Run tests
         run: npm test
       - name: Output information
-        run: echo "..."
+        # Alla käytetään kontekstin env-muuttujaa ${{ }} avulla
+        run: echo "MONGODB_NAME: ${{ env.MONGODB_NAME }}"
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -31,3 +47,6 @@ jobs:
       - name: Output information
         run: |        
           echo "..."
+
+
+
